@@ -14,7 +14,6 @@ class Scratch {
     public String tanggalLahir;
     static Scratch[] mahasiswa = new Scratch[3];
 
-
     public static void main(String[] args){
         mahasiswa[0] = new Scratch("Disiplin Gusti Telaumbanua", 1980416001, "18-08-1999");
         mahasiswa[1] = new Scratch("Sarinulo Laowo", 1980416002, "15-07-2000");
@@ -29,7 +28,7 @@ class Scratch {
     }
 
 
-    public  static void userMenu(){
+    public static void userMenu() throws ArrayIndexOutOfBoundsException {
         String[] menu = {"Tambah Data", "Hapus Data", "Edit Data", "Tampilkan Semua Data", "Keluar"};
 
         for (int i = 0; i < menu.length ; i++) {
@@ -46,13 +45,16 @@ class Scratch {
                     addArr();
                     break;
                 case 2:
-                    removeArr();
+                    if(mahasiswa.length > 0) removeArr();
+                    else throw new NegativeArraySizeException();
                     break;
                 case 3:
-                    editMenu();
+                    if(mahasiswa.length > 0) editMenu();
+                    else throw new NegativeArraySizeException();
                     break;
                 case 4:
-                    printData();
+                    if(mahasiswa.length > 0)  printData();
+                    else throw new NegativeArraySizeException();
                     break;
                 case 5:
                     System.exit(0);
@@ -85,6 +87,11 @@ class Scratch {
 
         catch (IllegalArgumentException e){
             System.err.println("illegal argument " + e);
+        }
+
+        catch (NegativeArraySizeException e){
+            System.err.println("Please insert data first " + e);
+            backButton();
         }
 
         catch (Exception e){
@@ -150,18 +157,18 @@ class Scratch {
         System.out.print("============================================================ \n");
         System.out.print("Enter Name: ");
         String name = scanAttribute.nextLine();
-        validateName(name);
+        Validation.validateName(name);
 
 
         System.out.print("Enter Nim (1912345678): ");
 
         int nim = Integer.parseInt(scanAttribute.nextLine());
-        validateNim(nim);
+        Validation.validateNim(nim);
 
         System.out.print("Enter Tgl-Lahir (DDMMYYYY): ");
         String tgl = scanAttribute.nextLine().replaceAll("(^\\d{2})(\\d{2})(\\d{4})", "$1-$2-$3");
-        validateName(tgl);
-        validateDate(tgl);
+        Validation.validateName(tgl);
+        Validation.validateDate(tgl);
 
         copyArr[mahasiswa.length] = new Scratch(name, nim, tgl);
 
@@ -175,41 +182,6 @@ class Scratch {
         backButton();
     }
 
-    public static void validateName(String str){
-        if(str.isBlank()) throw new IllegalArgumentException("Cannot Accept Blank Space");
-    }
-
-    public static void validateNim(int nim){
-        boolean validateNim = Integer.toString(nim).matches("(^(?=[19]+)\\d{2})(?=[0-9]+)\\d{8}$");
-
-        if(!validateNim){
-            throw new IllegalArgumentException("2 digits of first nim must be '19.........' and contains 10 digits of number");
-        }
-
-    }
-
-    public static void validateDate(String tgl)throws ParseException{
-
-        boolean validateDate =  tgl.matches("(^(?=[0-9]+)\\d{2})-(?=[0-9]+)\\d{2}-((?=[0-9]+)\\d{4}$)");
-
-        if (validateDate){
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-            LocalDate myObj = LocalDate.now();
-            DateTimeFormatter newDate = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            String formattedDate = myObj.format(newDate);
-            Date birthDate = dateFormat.parse(tgl);
-            Date currentDate = dateFormat.parse(formattedDate);
-
-            if(birthDate.compareTo(currentDate) > 0){
-                throw new IllegalArgumentException("Your birth date can't be greater than current date");
-            }
-
-        }
-        else {
-            throw new IllegalArgumentException("Please follow the birth date format!");
-        }
-
-    }
 
     public static void editMenu() throws ParseException{
         allData();
@@ -223,17 +195,17 @@ class Scratch {
 
         System.out.print("Enter Name: ");
         String editName = scanMenu.nextLine();
-        validateName(editName);
+        Validation.validateName(editName);
 
 
         System.out.print("Enter Nim: ");
         int editNim = Integer.parseInt(String.valueOf(scanMenu.nextLine()));
-        validateNim(editNim);
+        Validation.validateNim(editNim);
 
         System.out.print("Enter Birth: ");
         String editbirth = scanMenu.nextLine().replaceAll("(^\\d{2})(\\d{2})(\\d{4})", "$1-$2-$3");
-        validateName(editbirth);
-        validateDate(editbirth);
+        Validation.validateName(editbirth);
+        Validation.validateDate(editbirth);
 
         editArr[index].namaMahasiswa = editName;
         editArr[index].nimMahasiswa = editNim;
@@ -259,5 +231,47 @@ class Scratch {
         }else {
             throw new IllegalArgumentException("Only have 99");
         }
+    }
+}
+
+class Validation extends Scratch{
+
+    public Validation(String nama, int nim, String tanggal) {
+        super(nama, nim, tanggal);
+    }
+
+    public static void validateName(String str){
+        if(str.isBlank()) throw new IllegalArgumentException("Cannot Accept Blank Space");
+    }
+
+    public static void validateDate(String tgl)throws ParseException{
+
+        boolean validateDate =  tgl.matches("(^(?=[0-9]+)\\d{2})-(?=[0-9]+)\\d{2}-((?=[0-9]+)\\d{4}$)");
+
+        if (validateDate){
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            LocalDate myObj = LocalDate.now();
+            DateTimeFormatter newDate = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            String formattedDate = myObj.format(newDate);
+            Date birthDate = dateFormat.parse(tgl);
+            Date currentDate = dateFormat.parse(formattedDate);
+
+            if(birthDate.compareTo(currentDate) > 0){
+                throw new IllegalArgumentException("Your birth date can't be greater than current date");
+            }
+
+        }
+        else {
+            throw new IllegalArgumentException("Please follow the birth date format!");
+        }
+    }
+
+    public static void validateNim(int nim){
+        boolean validateNim = Integer.toString(nim).matches("(^(?=[19]+)\\d{2})(?=[0-9]+)\\d{8}$");
+
+        if(!validateNim){
+            throw new IllegalArgumentException("2 digits of first nim must be '19.........' and contains 10 digits of number");
+        }
+
     }
 }
