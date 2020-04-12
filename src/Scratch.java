@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 class Scratch {
     public String namaMahasiswa;
@@ -71,22 +73,27 @@ class Scratch {
         catch (NumberFormatException e){
             System.err.println("Only Accept Integer "+ e);
             System.err.println("Nim contains 10 digits of integers "+ e);
+            backButton();
         }
 
         catch (InputMismatchException e){
             System.err.println("Only Input Numbers "+ e);
+            backButton();
         }
 
         catch (ArithmeticException e){
             System.err.println("Wrong number, just 1-5 "+ e);
+            backButton();
         }
 
         catch (ArrayIndexOutOfBoundsException e){
             System.err.println("Wrong index "+ e);
+            backButton();
         }
 
         catch (IllegalArgumentException e){
             System.err.println("illegal argument " + e);
+            backButton();
         }
 
         catch (NegativeArraySizeException e){
@@ -192,6 +199,7 @@ class Scratch {
 
         System.out.print("Input Index Do You Want Edit: ");
         int index = Integer.parseInt(String.valueOf(scanMenu.nextLine()));
+        if(index < 0 || index > mahasiswa.length - 1) throw new ArrayIndexOutOfBoundsException();
 
         System.out.print("Enter Name: ");
         String editName = scanMenu.nextLine();
@@ -247,8 +255,20 @@ class Validation extends Scratch{
     public static void validateDate(String tgl)throws ParseException{
 
         boolean validateDate =  tgl.matches("(^(?=[0-9]+)\\d{2})-(?=[0-9]+)\\d{2}-((?=[0-9]+)\\d{4}$)");
+        Pattern validateDay = Pattern.compile("^(?=[0-9]+)\\d{2}");
+        Pattern validateMonth = Pattern.compile("\\b-((?=[0-9]+)\\d{2})-");
+        Matcher day = validateDay.matcher(tgl);
+        Matcher month = validateMonth.matcher(tgl);
+
 
         if (validateDate){
+            if(day.find()) {
+                if(Integer.parseInt(day.group()) > 31) throw new IllegalArgumentException("Your day can't be greater than 31");
+            }
+            if(month.find()){
+                if(Integer.parseInt(day.group()) > 12) throw new IllegalArgumentException("Your month can't be greater than 12");
+            }
+
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
             LocalDate myObj = LocalDate.now();
             DateTimeFormatter newDate = DateTimeFormatter.ofPattern("dd-MM-yyyy");
